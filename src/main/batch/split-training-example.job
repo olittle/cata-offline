@@ -1,0 +1,13 @@
+type=java
+job.class=com.linkedin.metronome.common.partitioning.AvroBernoulliRandomPartitioner
+
+dependencies=do-stratified-sampling
+
+input.paths=${home.dir}/sampled
+
+partition.ratio-train=2
+partition.ratio-validation=1
+partition.ratio-test=1
+
+output.path=${home.dir}/split
+param.OUTPUT=${dcrr.base}

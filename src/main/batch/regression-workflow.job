@@ -1,0 +1,5 @@
+type=command
+command=echo
+
+dependencies=validate-best-model
+param.OUTPUT=${dcrr.base}

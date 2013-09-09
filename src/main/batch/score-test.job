@@ -1,0 +1,9 @@
+type=java
+job.class=com.linkedin.metronome.common.evaluation.ScorerForEvaluation
+
+dependencies=select-best-model
+
+input.paths=${home.dir}/split/test
+model.paths=${home.dir}/model/best
+output.path=${home.dir}/score/test
+param.OUTPUT=${dcrr.base}

@@ -1,0 +1,15 @@
+type=java
+job.class=com.linkedin.metronome.common.sampling.AvroStratifiedSampler
+
+dependencies=cache-libraries,upload-resources
+
+input.paths=${home.dir}/resources/TrainingExample.avro
+
+stratum.extractor=com.linkedin.metronome.common.mapred.NestedFieldIdExtractor@label
+
+sampling.probability=1.0
+sampling.probability-0=0.6
+sampling.probability-1=0.9
+
+output.path=${home.dir}/sampled
+param.OUTPUT=${dcrr.base}

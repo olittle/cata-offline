@@ -1,0 +1,24 @@
+type=java
+job.class=com.linkedin.metronome.common.mapred.Executor
+
+dependencies=upload-resources
+  
+cache.archive-R=/jobs/tictac/lib/R-2.15.3-hadoop.jar
+cache.archive-R-library=/jobs/tictac/lib/R-library-2.15.3-SNAPSHOT.jar
+  
+cache.file-small.csv=${home.dir}/resources/small.csv
+cache.file-glmnet-train.R=${home.dir}/resources/glmnet-train.R
+cache.file-lm-train.R=${home.dir}/resources/lm-train.R 
+
+R=R/bin/R --vanilla --slave
+ 
+command-glmnet=${R} -f glmnet-train.R --args small.csv 1>&2; cat $TMPDIR/coeff.csv
+output.files-glmnet=$TMPDIR/model.pdf
+
+command-lm=${R} -f lm-train.R --args small.csv 1>&2; cat $TMPDIR/coeff.csv
+output.files-lm=$TMPDIR/model.pdf
+ 
+env-R_LIBS=R-library
+ 
+# Change output.path to somewhere you have write access.
+output.path=${home.dir}/r-out

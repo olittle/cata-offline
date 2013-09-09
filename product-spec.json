@@ -1,0 +1,44 @@
+{
+  "name": "catastrohpic-rec",
+  "group": "com.linkedin.liar",
+  "version": "0.0.1",
+  "description": "",
+  "build": {
+      "type": "gradle",
+      "url": "http://dist.codehaus.org/gradle/gradle-@spec.build.version@-all.zip",
+      "versions": {
+          "gradle": "1.5",
+          "rum": "2.6.4"
+      }
+  },
+ "deploy": {},
+ "dependencyResolution": {},
+ "external": {
+     "avro": "org.apache.avro:avro:1.4.1",
+     "azkaban": "com.linkedin.azkaban:azkaban-common:0.10",
+     "guava": "com.google.guava:guava:14.0.1",
+     "hadoopCore": "org.apache.hadoop:hadoop-core:1.0.4-p2",
+     "joda": "joda-time:joda-time:1.6",
+     "log4j": "log4j:log4j:1.2.15",
+     "lucene": "org.apache.lucene:lucene-core:2.9.1",
+     "testng": "org.testng:testng:6.4",
+     "voldemort": "voldemort:voldemort:0.96.li8",
+     "zoie": "com.linkedin.zoie:zoie-core:1.0.1-li0",
+     "pig": "org.apache.pig:pig:0.11.1",
+     "commonsLogging": "commons-logging:commons-logging:1.1.1"
+ },
+  "product": {
+      "liar-sharedlibs": {
+          "liar-hadoop-common": "com.linkedin.liar-sharedlibs:liar-hadoop-common:@spec.product.liar-sharedlibs.version@",
+          "datamodel": "com.linkedin.liar-sharedlibs:datamodel:@spec.product.liar-sharedlibs.version@",
+          "liar-util": "com.linkedin.liar-sharedlibs:liar-util:@spec.product.liar-sharedlibs.version@",
+          "version": "3.0.49"
+      },
+      "avro-schemas": {
+          "avro-schemas-builder": "com.linkedin.avro-schemas:avro-schemas-builder:@spec.product.avro-schemas.version@",
+          "avro-schemas-tracking": "com.linkedin.avro-schemas:avro-schemas-tracking:latest.integeration",
+          "version": "3.0.193"
+      }
+  },
+  "extSCM": {}
+}

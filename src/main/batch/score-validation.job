@@ -1,0 +1,9 @@
+type=java
+job.class=com.linkedin.metronome.common.evaluation.ScorerForEvaluation
+
+dependencies=run-liblinear
+
+input.paths=${home.dir}/split/validation
+model.paths=${home.dir}/model/all
+output.path=${home.dir}/score/validation
+param.OUTPUT=${dcrr.base}

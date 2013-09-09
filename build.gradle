@@ -1,0 +1,318 @@
+/**
+ * This is an Azkaban build.gradle script that does the following:
+ *
+ * 1) Variable substitution (gradle style (default) or maven style (-Pmaven))
+ * 2) Avro code generation
+ * 3) Azkaban zip file generation (ligradle azkaban)
+ * 4) Azkaban deployment (ligradle deploy)
+ * 5) Filter/profile file switching (e.g., -Pfilter=magic)
+ *
+ */
+
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.filters.ReplaceTokens;
+import com.linkedin.liar.gradle.MavenReplaceTokens; // for maven style variable substitution
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.AbstractConfiguration;
+
+apply plugin: "li-java"
+apply plugin: "eclipse"
+apply plugin: "idea"
+
+configurations {
+  avroCodeGen
+  azkabanRuntime {
+    extendsFrom runtime
+  }
+}
+
+apply from: "dependencies.gradle"
+
+repositories {
+  // Use the maven central, local, and nexus repos for the migration, which should be disabled in the future. Check go/elr.
+  mavenCentral()
+  mavenLocal()
+  // Use the li-nexus-temp repo for old nexus jars, which should be disabled when we migrated to multi-products.
+  maven {
+    url "http://artifactory.corp.linkedin.com:8081/artifactory/li-nexus-temp"
+  }
+}
+
+ext {
+  filterDir         = "${projectDir}/src/main/filters"
+  commonFilterFile  = "${filterDir}/common.properties"
+  defaultFilterFile = "${filterDir}/dev.properties"
+
+  jobDir          = "${projectDir}/src/main/batch"
+  pigDir          = "${projectDir}/src/main/pig"
+  pythonDir       = "${projectDir}/src/main/python"
+
+  resourceDir     = "${projectDir}/src/main/resources"
+  testResourceDir = "${projectDir}/src/test/resources"
+
+  avroDir         = "${projectDir}/src/main/avro"
+  avroGenDir      = "${buildDir}/avroGen"
+
+  azkabanDir      = "${buildDir}/azkaban"
+  azkabanZip      = "${buildDir}/${project.name}-${project.version}-azkaban.zip"
+
+  defaultProps    = ['project.group': project.group, 'project.groupId': project.group,
+                     'project.name': project.name, 'pom.name': project.name, 'project.artifactId': project.name,
+                     'project.version': project.version.toString(), 'pom.version': project.version.toString()]
+
+  myProps         = new Properties()
+}
+
+sourceSets {
+  main {
+    java {
+      srcDirs avroGenDir
+    }
+    resources {
+      exclude testResourceDir
+    }
+  }
+}
+
+buildscript {
+  dependencies {
+    classpath "commons-configuration:commons-configuration:1.6"
+    classpath "com.linkedin.liar-sharedlibs:gradle-util:4.0.12"
+  }
+}
+
+configurations {
+  all*.exclude group: 'pig-deps', module: 'pig-deps' // We no longer need to put pig jars in the Azkaban zip.
+
+  // We do not need to pack jars that are available on compute nodes. Version conflicts may cause problems.
+  // To use those jars, add /export/apps/hadoop/latest:/export/apps/hadoop/latest/lib:/export/apps/pig/latest/lib to classpath in your jobs.
+  azkabanRuntime.exclude group: 'org.apache.pig', module: 'pig'
+  azkabanRuntime.exclude group: 'org.apache.pig', module: 'piggybank'
+  azkabanRuntime.exclude group: 'org.apache.hadoop', module: 'hadoop-core'
+}
+
+configurations.all {
+
+  // We may want to force the versions for some libraries.
+  resolutionStrategy {
+     // Using a different avro version might cause many problems.
+    force spec.external.avro
+
+    // Some libraries depends on the latest version of commons-logging, which leads to commons-logging-99.0-does-not-exist.
+
+    // force spec.external.commonsLogging
+    // force spec.product.'avro-schemas'.'avro-schemas-tracking' // Force using the latest avro-schemas-tracking.
+  }
+
+  // Some libraries may have changed their group names or artifact names.
+  // We want to make sure that we only have one jar for each.
+  // We use avro as an example, and you amy add others.
+  resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+    // Use org.apache.avro:avro instead of org.apache.hadoop:avro.
+    if((details.requested.group == 'org.apache.hadoop') && (details.requested.name == 'avro')) {
+      details.useTarget spec.external.avro
+    }
+
+    // Use guava instead of google-collections.
+    // if(details.requested.name == 'google-collections') {
+    //  details.useTarget spec.external.guava
+    // }
+
+    // Use org.apache.pig:pig instead of linkedin-pig because we only have very old versions of linkedin-pig.
+    // if(details.requested.name == 'linkedin-pig') {
+    //  details.useTarget spec.external.pig
+    // }
+
+    // Use com.linkedin.liar-sharedlibs:liar-hadoop-common instead of com.linkedin.drama:drama-mapred-batch-commons.
+    // if(details.requested.name == 'drama-mapred-batch-commons') {
+    //  details.useTarget spec.product.'liar-sharedlibs'.'liar-hadoop-common'
+    // }
+
+    // Use com.linkedin.liar-sharedlibs:liar-util instead of com.linkedin.liar:liar-util
+    // if((details.requested.group == 'com.linkedin.liar') && (details.requested.name == 'liar-util')) {
+    //   details.useTarget spec.product.'liar-sharedlibs'.'liar-util'
+    // }
+  }
+}
+
+dependencies {
+  avroCodeGen spec.product.'avro-schemas'.'avro-schemas-builder'
+}
+
+task avroCodeGen(dependsOn: configurations.compile) {
+  description "Generate Java code from Avro schemas"
+
+  inputs.dir avroDir
+  outputs.dir avroGenDir
+
+  doLast {
+    if((new File(avroDir)).exists()) {
+      // clean target directory
+      ant.delete(dir: avroGenDir)
+      ant.mkdir(dir: avroGenDir)
+
+      javaexec {
+        classpath configurations.avroCodeGen.asPath
+        setMain "com.linkedin.avro.Builder";
+        args = ["--input", avroDir,
+                "--output", avroGenDir]
+        jvmArgs "-Xmx128m"
+      }
+    }
+  }
+}
+
+compileJava.dependsOn avroCodeGen
+
+task loadFilters << {
+  description "Load filter files"
+
+  defaultProps.each { myProps.setProperty(it.getKey(), it.getValue()) }
+
+  // Do not use delimiters in PropertiesConfiguration.
+  AbstractConfiguration.setDefaultListDelimiter(Character.MIN_VALUE);
+
+  // Load common filters if it exists
+  if((new File(commonFilterFile)).exists()) {
+    println "Loading filters from ${commonFilterFile} ..."
+    def commonProps = new PropertiesConfiguration(commonFilterFile);
+    commonProps.getKeys().each { myProps.setProperty(it, commonProps.getString(it))}
+  }
+
+  // Load additional filters specified via "-Pfilter="
+
+  def filterFile = null
+
+  if(project.hasProperty("filter")) {
+    filterFile = filterDir + "/" + project.getProperties().get("filter") + ".properties"
+    if(!(new File(filterFile)).exists()) {
+      throw new GradleException("Cannot find filter file ${filterFile}.")
+    }
+  }
+  else if(new File(defaultFilterFile).exists())
+  {
+    filterFile = defaultFilterFile
+  }
+
+  if(filterFile != null) {
+    println "Loading filters from ${filterFile} ..."
+    def filterProps = new PropertiesConfiguration(filterFile);
+    filterProps.getKeys().each { myProps.setProperty(it, filterProps.getString(it)) }
+  }
+}
+
+task setupAzkaban(dependsOn: [loadFilters, jar]) {
+  description = "Setup Azkaban file structure and configuration"
+
+  doLast {
+    println "Removing $azkabanDir ..."
+    ant.delete(dir: azkabanDir)
+
+    println "Copying filtered job files, pig scripts, etc into azkaban/ ..."
+    if(project.hasProperty("maven")) {
+      copy {
+        from fileTree(pigDir).files, fileTree(jobDir).files, fileTree(pythonDir).files // flattened
+        into azkabanDir
+        filter(MavenReplaceTokens, tokens: myProps)
+      }
+    }
+    else {
+      copy {
+        from fileTree(pigDir).files, fileTree(jobDir).files, fileTree(pythonDir).files // flattened
+        into azkabanDir
+        filter(ReplaceTokens, tokens: myProps)
+      }
+    }
+
+    println "Copying test resources into azkaban/resources ..."
+    copy {
+      from testResourceDir
+      into "${azkabanDir}/resources"
+    }
+
+    println "Copying project jars into azkaban/ ..."
+    copy {
+      from configurations.archives.artifacts*.file
+      into "${azkabanDir}/lib"
+    }
+
+    println "Copying runtime dependent jars into azkaban/lib"
+    copy {
+      from configurations.azkabanRuntime
+      into "${azkabanDir}/lib"
+      exclude "**/*-javadoc.jar"
+      exclude "**/*-sources.jar"
+    }
+  }
+}
+
+task azkaban(dependsOn: setupAzkaban) {
+  description "Zip ${azkabanDir} into ${azkabanZip}"
+
+  doLast {
+    ant.delete(file: azkabanZip)
+    ant.zip(basedir: azkabanDir, destfile: azkabanZip, level: 0)
+  }
+}
+
+task deploy(dependsOn: azkaban) << {
+  description "Deploy the Azkaban zip to Azkaban2"
+
+  Console console = System.console()
+
+  def azkabanUrl = myProps.get("azkaban.url")
+  if(azkabanUrl == null) {
+    throw new GradleException("azkaban.url is not set in filter/profile files. "
++ "Please set azkaban.url=https://eat1-magicaz01.grid.linkedin.com:8443 for magic "
++ "or azkaban.url=https://eat1-canastaaz01.grid.linkedin.com:8443 for canasta.");
+  }
+
+  def azkabanUserName = myProps.get("azkaban.user.name")
+  if(azkabanUserName == null) {
+    azkabanUserName = console.readLine("\nAzkaban user name (azkaban.user.name): ")
+  }
+
+  def azkabanProjectName = myProps.get("azkaban.project.name")
+  if(azkabanProjectName == null) {
+    azkabanProjectName = console.readLine("\nAzkaban project name (azkaban.project.name): ")
+  }
+
+  def password = myProps.get("azkaban.password")
+  if(password == null) {
+    password = console.readPassword("\nAzkaban password (azkaban.password) for ${azkabanUserName}: ")
+  }
+
+  println "Uploading Azkaban zip file: ${azkabanZip}\n"
+
+  def os = new ByteArrayOutputStream()
+  def es = new ByteArrayOutputStream()
+
+  exec {
+    logging.setLevel(LogLevel.QUIET) // do not show password in terminal
+    executable "curl"
+    args "${azkabanUrl}/manager", "-k", "-X", "POST", "-F", "action=upload", "-F",
+    "username=${azkabanUserName}", "-F", "password=${password}", "-F",
+    "project=${azkabanProjectName}", "-F", "file=@${azkabanZip};type=application/zip", "-v"
+    errorOutput = es
+    standardOutput = os
+  }
+
+  def outputString = os.toString()
+  def errorString = es.toString()
+
+  if(outputString =~ "error" || outputString =~ "failure")
+  {
+    throw new GradleException(outputString)
+  }
+
+  if(errorString =~ "error" || errorString =~ "failure")
+  {
+    throw new GradleException(errorString)
+  }
+}
+
+// configuration for idea
+
+// configuration for eclipse
+
+classification = "library"

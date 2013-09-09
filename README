@@ -1,0 +1,7 @@
+Extract the Features of users:
+    1. # of address book * 0.1 
+    2. CTR ( # of ads clicked / # of ads impressed) 
+    3. CR ( # of ads converted / # of ads impressed) 
+    4. invitations acceptance rate 
+    5. invitations sent log( 1 + #) 
+    6. 

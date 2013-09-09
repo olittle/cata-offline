@@ -1,0 +1,20 @@
+dependencies {
+  compile "com.linkedin.metronome:metronome-common:0.1.9"
+  compile "org.apache.pig:pig:0.10.0"
+//  compile "com.google.guava:guava:14.0.1"
+  azkabanRuntime "com.linkedin.sage:sage-indexing:2.5"
+//  compile "com.linkedin.liar-sharedlibs:liar-hadoop-common:4.0.12"
+  azkabanRuntime "com.linkedin.liar:liar-crown:3.8.6"
+}
+
+configurations {
+ all*.exclude group: "linkedin-pig"
+ all*.exclude group: "com.linkedin.batch", module: "hadoop-core"
+ all*.exclude group: "com.oracle", module: "ojdbc14"
+ all*.exclude group: "com.google.collections"
+ all*.exclude group: "pig-deps"
+ all*.exclude group: "com.linkedin.drama", module: "drama-mapred-batch-commons"
+ all*.exclude group: "com.linkedin.batch", module: "hadoop-etl"
+ all*.exclude group: "com.linkedin.batch", module: "batch-etl"
+ compile.exclude group: "com.snaproject.zoie"
+}
