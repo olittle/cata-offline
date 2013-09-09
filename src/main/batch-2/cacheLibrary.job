@@ -1,0 +1,13 @@
+type=java
+job.class=com.linkedin.drama.mapred.CacheLibraryJob
+dependencies=
+#classpath=${local.classpath}
+local.library.path=${local.library.path}
+remote.library.path=${remote.library.path}
+hdfs.default.classpath.dir=${remote.library.path}
+overwrite.existing=true 
+
+${hadoop.job.ugi.cmd}
+azkaban.should.proxy=${azkaban.should.proxy}
+user.to.proxy=${user.to.proxy}
+param.OUTPUT=${dcrr.base}

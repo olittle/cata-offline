@@ -1,0 +1,12 @@
+type=java
+job.class=com.linkedin.metronome.common.evaluation.ModelSelector
+
+dependencies=evaluate-test
+
+input.paths=${home.dir}/model/best
+metric.paths=${home.dir}/metric/test
+output.path=${home.dir}/model/validated
+
+metric.names=prAUC
+min.value-prAUC=0.6
+param.OUTPUT=${dcrr.base}

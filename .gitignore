@@ -49,5 +49,3 @@ nosetests.xml
 .project
 .pydevproject
 
-# output file 
-*[0-9]*

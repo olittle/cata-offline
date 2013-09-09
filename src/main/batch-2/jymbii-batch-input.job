@@ -1,0 +1,15 @@
+type=command
+command=echo
+
+dependencies=jymbii-batch-split-0,jymbii-batch-split-1,jymbii-batch-split-2,jymbii-batch-split-3,jymbii-batch-split-4,jymbii-batch-split-5,jymbii-batch-split-6,jymbii-batch-split-7,jymbii-batch-split-8,jymbii-batch-split-9,jymbii-batch-split-10,jymbii-batch-split-11,jymbii-batch-split-12,jymbii-batch-split-13,jymbii-batch-split-14,jymbii-batch-split-15,jymbii-batch-split-16,jymbii-batch-split-17,jymbii-batch-split-18,jymbii-batch-split-19,jymbii-batch-split-20,jymbii-batch-split-21,jymbii-batch-split-22,jymbii-batch-split-23,jymbii-batch-split-24,jymbii-batch-split-25,jymbii-batch-split-26,jymbii-batch-split-27,jymbii-batch-split-28,jymbii-batch-split-29
+hadoop.job.ugi=${hadoop.job.ugi.cmd}
+udf.import.list=oink.:com.linkedin.pig.:com.linkedin.pig.date.:org.apache.pig.piggybank.:org.apache.pig.piggybank.evaluation.:org.apache.pig.piggybank.evaluation.string.:org.apache.pig.piggybank.evaluation.math.:com.linkedin.liar.pigUDFs.
+#pig.additional.jars=${project.artifactId}-${project.version}.jar
+
+# Azkaban parameters
+azkaban.should.proxy=${azkaban.should.proxy}
+user.to.proxy=${user.to.proxy}
+hdfs.default.classpath.dir=${remote.library.path}
+#classpath=${local.classpath}
+
+param.OUTPUT=${dcrr.base}

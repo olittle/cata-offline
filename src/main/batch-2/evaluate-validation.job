@@ -1,0 +1,10 @@
+type=java
+job.class=com.linkedin.metronome.common.evaluation.Evaluator
+
+dependencies=score-validation
+
+input.paths=${home.dir}/score/validation
+output.path=${home.dir}/metric/validation
+
+metrics.calculators=com.linkedin.metronome.common.evaluation.BinaryClassificationMetricsCalculator
+param.OUTPUT=${dcrr.base}

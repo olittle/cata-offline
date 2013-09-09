@@ -1,0 +1,60 @@
+type=java
+job.class=com.linkedin.metronome.common.mapred.Executor
+
+dependencies=upload-resources
+
+index=0
+  
+cache.archive-python=/user/hgui/python-2.7-numpy-scipy.jar
+cache.archive-lapack=/user/hgui/lapack-3.3.jar
+  
+cache.file-Test.py=${home.dir}/resources/Test.py
+cache.file-Sample_Tuple.py=${home.dir}/resources/Sample_Tuple.py
+cache.file-LoadData.py=${home.dir}/resources/LoadData.py
+cache.file-main-mem-reduce.py=${home.dir}/resources/main-mem-reduce.py
+cache.file-Store.py=${home.dir}/resources/Store.py
+cache.file-lr_solver_BC.py=${home.dir}/resources/lr_solver_BC.py
+cache.file-lr_solver_MC.py=${home.dir}/resources/lr_solver_MC.py
+
+cache.file-input.txt=${data.dir}/input-1.txt
+
+command-test0=python/bin/python main-mem-reduce.py 32 250 30
+output.files-test0=Member.Benefit.Matrix,Job.Benefit.Matrix,Member.Cost
+
+command-test1=python/bin/python main-mem-reduce.py 32 250 30
+output.files-test1=Member.Benefit.Matrix,Job.Benefit.Matrix,Member.Cost
+
+command-test2=python/bin/python main-mem-reduce.py 32 250 30
+output.files-test2=Member.Benefit.Matrix,Job.Benefit.Matrix,Member.Cost
+
+command-test3=python/bin/python main-mem-reduce.py 32 250 30 
+output.files-test3=Member.Benefit.Matrix,Job.Benefit.Matrix,Member.Cost
+
+command-test4=python/bin/python main-mem-reduce.py 32 250 30
+output.files-test4=Member.Benefit.Matrix,Job.Benefit.Matrix,Member.Cost
+
+command-test5=python/bin/python main-mem-reduce.py 32 250 30
+output.files-test5=Member.Benefit.Matrix,Job.Benefit.Matrix,Member.Cost
+
+command-test6=python/bin/python main-mem-reduce.py 32 250 30
+output.files-test6=Member.Benefit.Matrix,Job.Benefit.Matrix,Member.Cost
+
+command-test7=python/bin/python main-mem-reduce.py 32 250 30 
+output.files-test7=Member.Benefit.Matrix,Job.Benefit.Matrix,Member.Cost
+
+command-test8=python/bin/python main-mem-reduce.py 32 250 30
+output.files-test8=Member.Benefit.Matrix,Job.Benefit.Matrix,Member.Cost
+
+command-test9=python/bin/python main-mem-reduce.py 32 250 30
+output.files-test9=Member.Benefit.Matrix,Job.Benefit.Matrix,Member.Cost
+ 
+env-PATH=python/bin:/usr/local/bin:/usr/bin
+env-PYTHONPATH=./:python/lib/python2.7/site-packages
+env-LD_LIBRARY_PATH=lapack:python/lib:/usr/local/lib:/usr/lib
+ 
+# Change output.path to somewhere you have write access.
+output.path=${output.dir}/python-out-1
+
+hadoop-conf.mapred.job.reduce.memory.mb=7168
+hadoop-conf.mapred.task.timeout=36000000
+param.OUTPUT=${dcrr.base}

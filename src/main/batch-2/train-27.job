@@ -1,0 +1,70 @@
+
+type=java
+job.class=com.linkedin.metronome.common.mapred.Executor
+
+dependencies=upload-resources
+
+cache.archive-python=/jobs/tictac/lib/python-2.7.5-metronome.jar
+cache.archive-lapack=/jobs/tictac/lib/lapack-3.2.1-metronome.jar
+
+cache.file-Test.py=${home.dir}/resources/Test.py
+cache.file-Sample_Tuple.py=${home.dir}/resources/Sample_Tuple.py
+cache.file-LoadData.py=${home.dir}/resources/LoadData.py
+cache.file-main-mem-reduce.py=${home.dir}/resources/main-mem-reduce.py
+cache.file-Store.py=${home.dir}/resources/Store.py
+cache.file-lr_solver_BC.py=${home.dir}/resources/lr_solver_BC.py
+cache.file-lr_solver_MC.py=${home.dir}/resources/lr_solver_MC.py
+cache.file-Predict.py=${home.dir}/resources/Predict.py
+
+cache.file-input.txt=${data.dir}/Bucket-27
+
+
+command-test0=python/bin/python main-mem-reduce.py 32 250 8
+output.files-test0=test.out.hit,test.out.miss
+
+
+command-test1=python/bin/python main-mem-reduce.py 32 250 8
+output.files-test1=test.out.hit,test.out.miss
+
+
+command-test2=python/bin/python main-mem-reduce.py 32 250 8
+output.files-test2=test.out.hit,test.out.miss
+
+
+command-test3=python/bin/python main-mem-reduce.py 32 250 8
+output.files-test3=test.out.hit,test.out.miss
+
+
+command-test4=python/bin/python main-mem-reduce.py 32 250 8
+output.files-test4=test.out.hit,test.out.miss
+
+
+command-test5=python/bin/python main-mem-reduce.py 32 250 8
+output.files-test5=test.out.hit,test.out.miss
+
+
+command-test6=python/bin/python main-mem-reduce.py 32 250 8
+output.files-test6=test.out.hit,test.out.miss
+
+
+command-test7=python/bin/python main-mem-reduce.py 32 250 8
+output.files-test7=test.out.hit,test.out.miss
+
+
+command-test8=python/bin/python main-mem-reduce.py 32 250 8
+output.files-test8=test.out.hit,test.out.miss
+
+
+command-test9=python/bin/python main-mem-reduce.py 32 250 8
+output.files-test9=test.out.hit,test.out.miss
+
+
+env-PATH=python/bin:/usr/local/bin:/usr/bin
+env-PYTHONPATH=./:python/lib/python2.7/site-packages
+env-LD_LIBRARY_PATH=lapack:python/lib:/usr/local/lib:/usr/lib
+
+# Change output.path to somewhere you have write access.
+output.path=${output.dir}/python-out-27
+
+hadoop-conf.mapred.job.reduce.memory.mb=7168
+hadoop-conf.mapred.task.timeout=36000000

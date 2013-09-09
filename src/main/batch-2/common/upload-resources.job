@@ -1,0 +1,9 @@
+type=pig
+pig.script=copy-from-local.pig
+
+dependencies=jymbii-batch-input
+
+param.src=resources
+param.dst=${home.dir}/resources
+
+queue.name=default

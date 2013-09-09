@@ -1,0 +1,22 @@
+
+
+#Job properties
+type=pig
+dependencies=jymbii-batch-score
+hadoop.job.ugi=${hadoop.job.ugi.cmd}
+udf.import.list=oink.:com.linkedin.pig.:com.linkedin.pig.date.:org.apache.pig.piggybank.:org.apache.pig.piggybank.evaluation.:org.apache.pig.piggybank.evaluation.string.:org.apache.pig.piggybank.evaluation.math.:com.linkedin.liar.pigUDFs.
+#pig.additional.jars=${project.artifactId}-${project.version}.jar
+
+pig.script=Split.pig
+# Arguments for optimizing Pig on Hadoop
+#jvm.args=-Dmapred.job.queue.name=marathon -Djava.io.tmpdir=/grid/a/mapred/tmp -Ddfs.umaskmode=002 -Dpig.additional.jars=${pig.home}/lib/*:./${project.artifactId}-${project.version}.jar
+#jvm.args=-Djava.io.tmpdir=/grid/a/mapred/tmp -Ddfs.umaskmode=002 -Dpig.additional.jars=${pig.home}/lib/*:./${project.artifactId}-${project.version}.jar
+
+# Azkaban parameters
+azkaban.should.proxy=${azkaban.should.proxy}
+user.to.proxy=${user.to.proxy}
+hdfs.default.classpath.dir=${remote.library.path}
+#classpath=${local.classpath}
+
+param.INDEX=18
+param.OUTPUT=${dcrr.base}

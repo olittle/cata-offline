@@ -1,0 +1,8 @@
+type=java
+job.class=com.linkedin.drama.mapred.CacheLibraryJob
+
+local.library.path=lib
+remote.library.path=${home.dir}/lib
+overwrite.existing=true
+
+queue.name=marathon
